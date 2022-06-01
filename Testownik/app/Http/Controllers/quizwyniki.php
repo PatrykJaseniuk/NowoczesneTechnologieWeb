@@ -10,51 +10,57 @@ class quizwyniki extends Controller
 
     public function __construct()
     {
-        $this->arg1 = 'quizId';
-        $this->arg1 = 'uzytkownikId';
+        $this->arg1 = 'idTest';
+        $this->arg2 = 'idUzytkownik';
         $this->middle = CzyToZalogowanyUzytkownik::class;
     }
-    public function dzialaj($quizId, $uzytkownikId)
+    public function dzialaj($idTest, $idUzytkownik)
     {
-        $czyUczenMaDostepDoQuizu = $this->sprawdzanieCzyUczenMaDostepDoQuizu($quizId);
-        if($czyUczenMaDostepDoQuizu)
-        {
-            $pytania = $this->getPytaniaQuizu($quizId);
-            return view('quizwyniki', ['pytania'=>$pytania]);
-        }
-        else
-        {
+        $czyUczenMaDostepDoQuizu = $this->sprawdzanieCzyUczenMaDostepDoQuizu($idTest);
+        if ($czyUczenMaDostepDoQuizu) {
+            $pytaniaIOdpowiedzi = $this->getPytaniaIOdpowiedziQuizu($idTest, $idUzytkownik);
+            $wynik = $this->getWynik($idTest, $idUzytkownik);
+            return view('quizwyniki',
+                [
+                    'pytaniaIOdpowiedzi' => $pytaniaIOdpowiedzi,
+                    'wynik'=>$wynik
+                ]
+            );
+        } else {
             return redirect((new uczen())->routeGet());
         }
-
     }
 
-    private function sprawdzanieCzyUczenMaDostepDoQuizu($quizId)
+    private function sprawdzanieCzyUczenMaDostepDoQuizu($idTest)
     {
         // to do
         return true;
     }
 
-    private function getPytaniaQuizu($quizId)
+    private function getPytaniaIOdpowiedziQuizu($idTest, $idUzytkownik)
     {
-        //to do
-        $pytanie1 = ['trescPytania'=>'Ile kosztuje tona eko groszku',
-         'wariantyOdpowiedzi'=>[
-             ['czyZaznaczono'=>'true','czyPrawidlowa'=>'false', 'odpowiedz'=>'1000'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'false', 'odpowiedz'=>'2000'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'false', 'odpowiedz'=>'3000'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'true', 'odpowiedz'=>'6000']
-             ]];
-
-             $pytanie2 = ['trescPytania'=>'Ile wazy ziemia',
-         'wariantyOdpowiedzi'=>[
-             ['czyZaznaczono'=>'true','czyPrawidlowa'=>'false', 'odpowiedz'=>'malo'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'false', 'odpowiedz'=>'duzo'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'false', 'odpowiedz'=>'bardzo duzo'],
-             ['czyZaznaczono'=>'false','czyPrawidlowa'=>'true', 'odpowiedz'=>'5,9722⋅E24']
-             ]];
+        $pytania = ('App\Models\test')::find($idTest)->pytanie;
+        $odpowiedzi = ('App\Models\odpowiedz')::where('id_test', $idTest)->where('id_uzytkownik', $idUzytkownik);
 
 
-        return [$pytanie1,$pytanie2];
+        $pytaniaIOdpowiedzi = [];
+        foreach ($pytania as $key => $pytanie) {
+            $odpowiedzRekord = ('App\Models\odpowiedz')::where('id_test', $idTest)->where('id_uzytkownik', $idUzytkownik)->where('id_pytanie', $pytanie->id)->first();
+            $udzielonaOdpowiedz = '';
+            if ($odpowiedzRekord != null) {
+                $udzielonaOdpowiedz = $odpowiedzRekord->odpowiedz;
+            }
+            $pytaniaIOdpowiedzi[$key] = [
+                'pytanie' => $pytanie->tresc,
+                'prawidlowaOdpowiedz' => $pytanie->prawidlowa_odpowiedz,
+                'udzielonaOdpowiedz' => $udzielonaOdpowiedz
+            ];
+        }
+        return $pytaniaIOdpowiedzi;
+    }
+
+    private function getWynik($idTest, $idUzytkownik)
+    {
+        return ('App\Models\wynik')::where('id_test', $idTest)->where('id_uzytkownik', $idUzytkownik)->first()->wynik;
     }
 }

@@ -39,8 +39,17 @@ class details extends Controller
 
         foreach ($tabele as $nazwaTabeli2 => $tabela) {
             $tabelaZCallbackami=[];
-            $tabela = $tabela->toArray();
+            if($tabela instanceof stdClass){
+                $tabela = get_object_vars($tabela);
+            }
+            else{
+                $tabela = $tabela->toArray();
+            }
+
             foreach ($tabela as $key => $rekord2) {
+                if( is_object($rekord2)){
+                    $rekord2 = get_object_vars($rekord2);
+                }
                 $tabela1 = $rekord->table;
                 $id1 = $rekord->id;
                 $tabela2 = $nazwaTabeli2;

@@ -14,64 +14,81 @@ class uczen extends Controller
 
     public function dzialaj(Request $request)
     {
-        $uzytkownik = session()->get('uzytkownik',null);
+        $uzytkownik = session()->get('uzytkownik', null)->refresh();
         $daneUcznia = $this->getDaneUcznia($uzytkownik);
         $dostepneQuizyZCallbackami = $this->getDostepneQuizyZCallbackami($uzytkownik);
-        $rozwiazaneQuizyZCallbackami = $this->getRozwiazaneQuizyZCallbackami($request);
-        return view('uczen', ['dostepneQuizyZCallbackami'=>$dostepneQuizyZCallbackami,
-        'rozwiazaneQuizyZCallbackami'=>$rozwiazaneQuizyZCallbackami,
-        'daneUcznia'=>$daneUcznia]);
+        $rozwiazaneQuizyZCallbackami = $this->getRozwiazaneQuizyZCallbackami($uzytkownik);
+        return view('uczen',
+            [
+                'dostepneQuizyZCallbackami' => $dostepneQuizyZCallbackami,
+                'rozwiazaneQuizyZCallbackami' => $rozwiazaneQuizyZCallbackami,
+                'daneUcznia' => $daneUcznia
+            ]
+        );
     }
 
     private function getDaneUcznia($uzytkownik)
     {
-        $daneUcznia = ['imie'=>$uzytkownik->imie, 'nazwisko'=>$uzytkownik->nazwisko];
+        $daneUcznia = ['imie' => $uzytkownik->imie, 'nazwisko' => $uzytkownik->nazwisko];
         return $daneUcznia;
     }
 
     private function getDostepneQuizyZCallbackami($uzytkownik)
     {
-        // $testy = test::whereHas('comments', function($q)
-        // {
-        //     $q->where('content', 'like', 'foo%');
+        $wszystkieTesty = $uzytkownik->test->toArray();
 
-        // })->get();
-        $quiz = new quiz();
-        $wszystkieTesty= $uzytkownik->test->toArray();
-            $testy=[];
-        foreach ($wszystkieTesty as $key => $value) {
-            $testy[$key] =['dane'=>$value, 'callbackRozpocznijQuiz'=>$quiz->routeGet($value['id'])];
+        $testyDostepne = [];
+        foreach ($wszystkieTesty as $key => $test) {
+            $wynikTestu = ('App\Models\wynik')::where('id_test', $test['id'])->where('id_uzytkownik', $uzytkownik->id)->first();
+            $czyTerminWlasciwy = $this->czyDataPasuje($test['id']);
+
+            if ($wynikTestu == null && $czyTerminWlasciwy == true) {
+                $testyDostepne[$key] = $test;
+            }
         }
-        // $testyBezodpowiedzi = $wszystkieTesty->
 
-
-        $quiz1 = ['dane'=>['nazwa'=>'Bardzo trudny quiz',
-        'czas'=>'10',
-        'dataRozpoczecia'=>'dzisiaj',
-        'dataZakonczenia'=>'jutro'],
-        'callbackRozpocznijQuiz'=>$quiz->routeGet(1)];
-
-        $quiz2 = ['dane'=>['nazwa'=>'Bardzo latwy quiz',
-        'czas'=>'30',
-        'dataRozpoczecia'=>'jutor',
-        'dataZakonczenia'=>'pojutrze'],
-        'callbackRozpocznijQuiz'=>$quiz->routeGet(2)];
-
-        return $testy;
+        $testyZClabackami = [];
+        foreach ($testyDostepne as $key => $value) {
+            $testyZClabackami[$key] = [
+                'dane' => $value,
+                'callbackRozpocznijQuiz' => (new quiz())->routeGet($value['id'])
+            ];
+        }
+        return $testyZClabackami;
     }
 
-    private function getRozwiazaneQuizyZCallbackami($request)
+    private function getRozwiazaneQuizyZCallbackami($uzytkownik)
     {
-        //to do
-        $quizWyniki = new quizwyniki();
-        $quiz1 = ['dane'=>['nazwa'=> 'test na pilota bombowca',
-        'wynik'=>'90%'],
-        'callBackQuizWyniki'=>$quizWyniki->routeGet(1)];
+        $wszystkieTesty = $uzytkownik->test->toArray();
+        $testyZWynikami = [];
 
-        $quiz2 = ['dane'=>['nazwa'=> 'test na pilota mysliwca',
-        'wynik'=>'80%'],
-        'callBackQuizWyniki'=>$quizWyniki->routeGet(2)];
+        foreach ($wszystkieTesty as $key => $test) {
+            $wynik = ('App\Models\wynik')::where('id_test', $test['id'])->where('id_uzytkownik', $uzytkownik->id)->first();
+            if ($wynik != null) {
+                $testyZWynikami[$key] = [
+                    'dane' => $test,
+                    'wynik' => $wynik->wynik,
+                    'callBackQuizWynik' => (new quizwyniki())->routeGet($test['id'], $uzytkownik->id)
+                ];
+            }
+        }
+        return $testyZWynikami;
+    }
 
-        return [$quiz1, $quiz2];
+    private function czyDataPasuje($quizId)
+    {
+        $test = ('App\Models\test')::find($quizId);
+
+        $czyMaDostep = false;
+        $teraz = date('Y-m-d');
+        $odKiedy = $test->data_rozpoczecia;
+        $doKiedy = $test->data_zakonczenia;
+
+        if ($teraz > $odKiedy && $teraz < $doKiedy) {
+            $czyMaDostep = true;
+        } else {
+            $czyMaDostep = false;
+        }
+        return $czyMaDostep;
     }
 }

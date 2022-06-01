@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class test extends Model
 {
@@ -32,9 +33,18 @@ class test extends Model
 
     public function getTabeleZwiazane()
     {
-        return $tabeleZwiazane=[
+        $wyniki = DB::table('wynik')->where('wynik.id_test', $this->id);
+        $uzytkownicyZWynikami = DB::table('uzytkownik')
+            ->join('test_uzytkownik', 'uzytkownik.id', '=', 'test_uzytkownik.id_uzytkownik')
+            ->where('test_uzytkownik.id_test', $this->id)
+            ->leftJoinSub($wyniki, 'wynik', function ($join) {
+                $join->on('uzytkownik.id', '=', 'wynik.id_uzytkownik');
+            })
+            ->select('uzytkownik.*', 'wynik.wynik')
+            ->get();
+        return [
             'pytanie'=>$this->pytanie,
-            'uzytkownik'=>$this->uzytkownik
+            'uzytkownik'=>$uzytkownicyZWynikami
         ];
     }
 }

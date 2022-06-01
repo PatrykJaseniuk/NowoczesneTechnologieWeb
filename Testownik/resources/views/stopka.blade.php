@@ -1,1 +1,3 @@
-<h1>stopka</h1>
+<footer class="py-3 my-4">
+    <p class="text-center text-muted">Testownik</p>
+  </footer>

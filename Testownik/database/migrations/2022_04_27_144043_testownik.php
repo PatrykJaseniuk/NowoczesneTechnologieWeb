@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('nazwa');
             $table->date('data_rozpoczecia')->nullable();
             $table->date('data_zakonczenia')->nullable();
-            $table->interval('czas_trwania')->nullable();
+            $table->bigInteger('czas_trwania')->nullable();
         });
 
         Schema::create('pytanie', function (Blueprint $table) {

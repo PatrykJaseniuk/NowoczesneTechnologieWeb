@@ -28,15 +28,22 @@
 
     <h1>Rozwiazane testy</h1>
     <table>
-        @foreach ($rozwiazaneQuizyZCallbackami as $quizZCallbackiem)
-            @php
-                $daneQuizu = $quizZCallbackiem['dane'];
-            @endphp
+        @isset($rozwiazaneQuizyZCallbackami[0]['dane'])
             <tr>
-                @foreach ($daneQuizu as $dana)
+                @foreach ($rozwiazaneQuizyZCallbackami[0]['dane'] as $nazwaKolumny=>$value)
+                    <td>{{ $nazwaKolumny }}</td>
+                @endforeach
+                <td>wynik</td>
+            </tr>
+        @endisset
+
+        @foreach ($rozwiazaneQuizyZCallbackami as $quizZCallbackiem)
+            <tr>
+                @foreach ($quizZCallbackiem['dane'] as $dana)
                     <td>{{ $dana }}</td>
                 @endforeach
-                <td><a href="{{ $quizZCallbackiem['callBackQuizWyniki'] }}">sprawdz</a></td>
+                <td>{{ $quizZCallbackiem['wynik'] }}</td>
+                <td><a href="{{ $quizZCallbackiem['callBackQuizWynik'] }}">sprawdz</a></td>
             </tr>
         @endforeach
     </table>

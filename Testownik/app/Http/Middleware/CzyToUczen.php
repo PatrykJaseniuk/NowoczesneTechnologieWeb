@@ -20,7 +20,7 @@ class CzyToUczen
         $uzytkownik = session()->get('uzytkownik',null);
         if($uzytkownik !=null)
         {
-            if($uzytkownik['typ']=='uczen')
+            if($uzytkownik->typ=='uczen')
             {
                 return $next($request);
             }
