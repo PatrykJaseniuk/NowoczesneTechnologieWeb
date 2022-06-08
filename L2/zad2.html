@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <!-- form with fields: klasa, identyfikator. Fields with ids -->
+    <form id="form" method="post">
+        <input type="text" name="klasa" id="klasa" placeholder="Klasa">
+        <input type="text" name="identyfikator" id="identyfikator" placeholder="Identyfikator">                
+        <input type="submit" value="Wyszukaj">
+    </form>
+
+    <!-- empty unorder list -->
+    <ul id="list"></ul>
+
+    <!-- script -->
+    <script>
+
+        // on submit, get values from form and pop up a message with the values
+        document.getElementById('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var klasa = document.getElementById('klasa').value;
+            var identyfikator = document.getElementById('identyfikator').value;
+            alert('Klasa: ' + klasa + '\nIdentyfikator: ' + identyfikator);
+
+            // Find in document all elements with class "klasa"
+            var elements = document.querySelectorAll('.' + klasa);
+            // find in document all elements with id "identyfikator"
+            var elements2// = document.querySelectorAll('#' + identyfikator);
+            // add elements2 to elements
+            // elements = elements.concat(elements2);
+            
+            // fill unorder list with elements
+            var list = document.getElementById('list');
+            list.innerHTML = '';
+            for(var i = 0; i < elements.length; i++) {
+                var li = document.createElement('li');
+                li.innerHTML = elements[i].innerHTML;
+                list.appendChild(li);
+            }
+        });
+    </script>
+
+    <h1 class="borysek">Borysek</h1>
+    <h2>Marianek</h2>
+    <h3>Basia</h3>
+    <h4>Gienia</h4>
+    <h5 id="kasia">Kasia</h5>
+
+
+ 
+    
+</body>
+</html>

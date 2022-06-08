@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+    <h1>Products</h1>
+
+    <!-- icon of arrow down -->
+    <a href="#" class="fa fa-arrow-down"></a>
+
+    <!-- products tabele with sort and filter  -->
+    <table class="table table-striped">
+        <thead>
+            <!-- sort by buttons -->
+            <tr>                
+                <th>sort</th>
+                <th>
+                    <!-- button sort by name -->
+                    <button type="button" class="btn btn-primary" onclick="sortBy('name','asc')"><i class="fa fa-sort-alpha-asc"></i></button>
+                    <button type="button" class="btn btn-primary" onclick="sortBy('name','desc')">
+                    <!-- icon of sort descending -->
+                    <i class="fa fa-sort-alpha-desc"></i></button>
+                    </button>
+                </th>
+                <th>
+                     <!-- button sort by price -->
+                     <button type="button" class="btn btn-primary" onclick="sortBy('price','asc')"><i class="fa fa-sort-alpha-asc"></i></button>
+                     <button type="button" class="btn btn-primary" onclick="sortBy('price','desc')"><i class="fa fa-sort-alpha-desc"></i></button></button>
+                </th>
+                <th>
+                    <button type="button" class="btn btn-primary" onclick="sortBy('category','asc')"><i class="fa fa-sort-alpha-asc"></i></button>
+                    <button type="button" class="btn btn-primary" onclick="sortBy('category','desc')"><i class="fa fa-sort-alpha-desc"></i></button></button>
+                </th>
+            </tr>
+
+            <!-- filter -->
+            <tr>
+                <th>filter</th>
+                <th>
+                    <!-- input filter by name -->
+                    <input type="text" id="filterByname" onkeyup="filterBy('name')" placeholder="name">
+                </th>
+                <th>
+                    <!-- input filter by price -->
+                    <input type="text" id="filterByprice" onkeyup="filterBy('price')" placeholder="price">
+                </th>
+                <th>
+                    <!-- input filter by category -->
+                    <input type="text" id="filterBycategory" onkeyup="filterBy('category')" placeholder="category">
+                </th>
+            </tr>
+
+
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Producer</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody id="tBody">
+        </tbody>
+    </table>
+
+    <script>
+        getProducts();
+        
+        // get all products from server
+        function getProducts() {
+            fetch('productsapi')
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(data);
+                    // console.log(data[0].name);
+                    // console.log(data[0].price);
+                    // console.log(data[0].category);
+                    // console.log(data[0].producer);
+                    // console.log(data[0].description);
+                    // console.log(data[0].image);
+
+                    printProducts(data);
+                })
+                .catch(error => console.error(error));
+        }
+
+        function printProducts(data)
+        {
+            // clear table
+            document.getElementById("tBody").innerHTML = "";
+
+            // create table rows
+            for (let i = 0; i < data.length; i++) {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${data[i].name}</td>
+                    <td>${data[i].price}</td>
+                    <td>${data[i].category}</td>
+                    <td>${data[i].producer}</td>
+                    <td><img src="${data[i].image}" alt="${data[i].name}" width="100" height="100"></td>
+                `;
+                // button desctiptions
+                let btnDesc = document.createElement('button');
+                btnDesc.innerHTML = "description";
+                btnDesc.setAttribute("class", "btn btn-primary");
+                btnDesc.setAttribute("onclick", `showDescription(${data[i].id})`);
+                row.appendChild(btnDesc);
+                
+                document.getElementById('tBody').appendChild(row);
+            }
+        }
+
+        function showDescription(id)
+        {
+            // description in new window
+            window.open(`productsapi?_description_id=${id}`, "_blank", "toolbar=yes,scrollbars=yes,resizable=yes,top=500,left=500,width=400,height=400");
+
+            // get description from server
+            fetch(`productsapi?_description_id=${id}&_json=true`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                   
+                    // show description in popup
+                   alert(data);
+                })
+                .catch(error => console.error(error));
+
+        }
+
+        function sortBy(sort,order) {
+            fetch(`productsapi?_sort=${sort}&_order=${order}`)
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(data);
+                    // console.log(data[0].name);
+                    // console.log(data[0].price);
+                    // console.log(data[0].category);
+                    // console.log(data[0].producer);
+                    // console.log(data[0].description);
+                    // console.log(data[0].image);
+                    
+                    printProducts(data);
+                })
+                .catch(error => console.error(error));
+        }
+
+        function filterBy(filterBy)
+        {
+            value = document.getElementById(`filterBy${filterBy}`).value;
+            fetch(`productsapi?_filterBy=${filterBy}&_where=${value}`)
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(data);
+                    // console.log(data[0].name);
+                    // console.log(data[0].price);
+                    // console.log(data[0].category);
+                    // console.log(data[0].producer);
+                    // console.log(data[0].description);
+                    // console.log(data[0].image);
+                    printProducts(data);
+                })
+                .catch(error => console.error(error));
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

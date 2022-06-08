@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <script>
+        password = 'password';
+        score=0;
+        while(true)
+        {
+            //ask user for leter, if leter is in password, add 1 to score if not, subtract 1 from score
+            var letter = prompt('Enter a letter');
+            if(letter == null || letter == '')
+            {
+                continue;
+            }
+            if(password.indexOf(letter) > -1)
+            {
+                score++;
+                //remove letter from password
+                password = password.replace(letter, '');
+            }
+            else
+            {
+                score--;
+            }
+            //pop up a message with the score
+            alert('Score: ' + score);
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,19 @@
+/* set backgroun colour blue */
+body {
+  background-color: #00bfff;
+}
+
+/* login-container centered, big magines and content in center*/
+.login-container {
+  margin: 0 auto;
+  width: 400px;
+  height: 400px; 
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}  
+
+/* paragraphs 10px margin for top and bottom */
+p {
+  margin: 10px 0;
+}
